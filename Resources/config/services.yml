@@ -1,0 +1,15 @@
+services:
+
+    owja_image_proxy.proxy:
+        class: Owja\ImageProxyBundle\Service\Proxy
+        arguments:
+            $filesystem:    "@owja_image_proxy.cache"
+            $processor:     "@owja_image_proxy.process"
+            $botUrl:        %owja_image_proxy.bot_url%
+            $timeout:       %owja_image_proxy.remote_timeout%
+
+    owja_image_proxy.process:
+        class: Owja\ImageProxyBundle\Service\Process
+        arguments:
+            $temp:          %owja_image_proxy.temp_dir%
+            $compression:   %owja_image_proxy.enable_compression%
