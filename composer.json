@@ -3,6 +3,7 @@
   "description": "Base Bundle for OWJA! Image Proxy",
   "keywords": [ "images", "processing", "proxy", "compressor", "resizing" ],
   "type" : "symfony-bundle",
+  "version": "0.0.1",
   "license": "MIT",
   "authors": [
     {

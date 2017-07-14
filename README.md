@@ -19,19 +19,19 @@ width | integer | no | Destination width of Image
 imagepath | string | yes | The public path to the Image
 
 Example to resize and crop the Image to fit into a 100x100 Pixel square:
-`http://example.com/resize/100x100/img/someimage.jpg`
+- `http://example.com/resize/100x100/img/someimage.jpg`
 
 Example cropping to fit into a 100x100 Pixel square:
-`http://example.com/resize/100x100/img/someimage.jpg`
+- `http://example.com/resize/100x100/img/someimage.jpg`
 
-Example to resize to 100 Pixel with and preserve original image Ratio: 
-`http://example.com/resize/x100/img/someimage.jpg`
+Example to resize to 100 Pixel with and preserve original image Ratio:
+- `http://example.com/resize/x100/img/someimage.jpg`
 
 Example to resize to 100 Pixel height and preserve original image Ratio:
-`http://example.com/resize/100x/img/someimage.jpg`
+- `http://example.com/resize/100x/img/someimage.jpg`
 
-Example to do ony the optimizations :
-`http://example.com/resize/x/img/someimage.jpg`
+Example to do ony the optimizations:
+- `http://example.com/resize/x/img/someimage.jpg`
 
 ## Installation
 
@@ -72,6 +72,12 @@ owja_image_proxy:
     type:     annotation
     prefix:   /
 ```
+
+Create the Directory for temporary Files which gets created while processing the Images:
+```
+var/temp
+```
+
 ## Configuration Details
 
 ```
@@ -120,9 +126,9 @@ owja_image_proxy:
 ##### Accessing the sites
 http://.../`site`/`type`/`height`x`width`/`imagepath`
 
-`http://example.com/default/resize/100x100/images/someimage.jpg`
-`http://example.com/othersite/resize/100x100/images/someimage.jpg`
-`http://example.com/wherever/resize/100x100/images/someimage.jpg`
+- `http://example.com/default/resize/100x100/images/someimage.jpg`
+- `http://example.com/othersite/resize/100x100/images/someimage.jpg`
+- `http://example.com/wherever/resize/100x100/images/someimage.jpg`
 
 
 ## Image Optimization
@@ -142,7 +148,7 @@ owja_image_proxy:
 ```
 ## Reporting & Collaboration
 
-Issues and feature requests are tracked in out Github Issue Tracker.
+Issues and feature requests are tracked in this Github Issue Tracker.
 Pull Requests to enhance the code to add features or to fix bugs are very welcome. ;-) 
 
 ## License
