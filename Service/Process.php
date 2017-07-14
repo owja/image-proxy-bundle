@@ -1,6 +1,7 @@
 <?php
 namespace Owja\ImageProxyBundle\Service;
 
+use ImageOptimizer\OptimizerFactory;
 use Owja\ImageProxyBundle\Exception\ConfigurationException;
 use Owja\ImageProxyBundle\Exception\ProcessingException;
 
@@ -35,23 +36,23 @@ class Process
     /**
      * @var bool
      */
-    protected $compression;
+    protected $optimization;
 
     /**
      * Constructor
      *
      * @param string $temp          local writable temp directory for image processing
-     * @param bool $compression     compress image after resize?
+     * @param bool $optimization     compress image after resize?
      * @throws ConfigurationException
      */
-    public function __construct(string $temp, bool $compression = self::NO_COMPRESSION)
+    public function __construct(string $temp, bool $optimization = self::NO_COMPRESSION)
     {
         if (!is_dir($temp)) {
             throw new ConfigurationException('Can not access temp directory.');
         }
 
         $this->temp         = $temp;
-        $this->compression  = $compression;
+        $this->optimization = $optimization;
     }
 
     /**
@@ -120,7 +121,7 @@ class Process
 
         try {
             ( $this->height || $this->width )   &&  $this->resize($file);
-            ( $this->compression )              &&  $this->compress($file);
+            ( $this->optimization )             &&  $this->optimize($file);
         } catch (ProcessingException $e) {
             unlink($file);
             throw $e;
@@ -138,18 +139,19 @@ class Process
     /**
      * Processing Image File
      *
-     * @param string $file              original image file
+     * @param string                $input  original image file
+     * @param string|null           $output output file. if set to null input file will be overwritten
      * @throws ProcessingException
      */
-    public function processFile(string $file)
+    public function processFile(string $input, string $output = null)
     {
-        $content = file_get_contents($file);
+        $content = file_get_contents($input);
 
         if (empty($content)) {
             throw new ProcessingException('File is empty.', 404);
         }
 
-        if (file_put_contents($file, $this->processContent($content))) {
+        if (file_put_contents($output ?: $input, $this->processContent($content))) {
             return;
         }
 
@@ -176,15 +178,24 @@ class Process
             throw new ProcessingException('Could not load file for resizing.');
         }
 
+        // Pre calculate new Size
+        $originalWidth = $im->getImageWidth();
+        $originalHeight = $im->getImageHeight();
+
+        if ($this->height === 0 && $this->width !== 0) {
+            $this->height = $originalHeight / $originalWidth * $this->width;
+        }
+
+        if ($this->width === 0 && $this->height !== 0) {
+            $this->width = $originalWidth / $originalHeight * $this->height;
+        }
+
         // Resize
         if ($this->type === self::RESIZE)
         {
-            $originalWidth = $im->getImageWidth();
-            $originalHeight = $im->getImageHeight();
-
             if ($originalWidth / $originalHeight < $this->width / $this->height) {
                 $resizeWidth = $this->width;
-                $resizeHeight = 0;
+                $resizeHeight = $this->height;
             } else {
                 $resizeWidth = 0;
                 $resizeHeight = $this->height;
@@ -218,11 +229,13 @@ class Process
         // ToDo After Resizing Event
     }
 
-    protected function compress(string $file)
+    protected function optimize(string $file)
     {
         // ToDo Before Compressing Event
 
-        // ToDo Compress Image
+        $factory = new OptimizerFactory();
+        $optimizer = $factory->get();
+        $optimizer->optimize($file);
 
         // ToDo After Compressing Event
     }

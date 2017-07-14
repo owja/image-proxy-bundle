@@ -7,14 +7,10 @@ use League\Flysystem\FileNotFoundException;
 use League\Flysystem\FilesystemInterface;
 use Owja\ImageProxyBundle\Exception\ConfigurationException;
 use Owja\ImageProxyBundle\Exception\NotFoundException;
+use Owja\ImageProxyBundle\Exception\ProcessingException;
 
 class Proxy
 {
-    /**
-     * @var string
-     */
-    private $botUrl;
-
     /**
      * @var int
      */
@@ -81,18 +77,25 @@ class Proxy
     protected $processedFile;
 
     /**
+     * @var array
+     */
+    protected $allowedMimeTypes = [
+        'image/png',
+        'image/jpeg',
+        'image/gif',
+    ];
+
+    /**
      * Constructor
      *
      * @param FilesystemInterface   $filesystem
      * @param Process               $processor
-     * @param string|null           $botUrl
      * @param int                   $timeout
      */
-    public function __construct(FilesystemInterface $filesystem, Process $processor, string $botUrl = null, int $timeout = 10)
+    public function __construct(FilesystemInterface $filesystem, Process $processor, int $timeout = 10)
     {
         $this->filesystem   = $filesystem;
         $this->processor    = $processor;
-        $this->botUrl       = $botUrl;
         $this->timeout      = $timeout ?: 10;
     }
 
@@ -213,6 +216,28 @@ class Proxy
     }
 
     /**
+     * Get modified of image
+     *
+     * @return string
+     */
+    public function getTimestamp() : string
+    {
+        $this->loadImage();
+        return $this->filesystem->getTimestamp($this->getPath(false));
+    }
+
+    /**
+     * Get cache tag
+     *
+     * @return string
+     */
+    public function getCacheTag() : string
+    {
+        $this->loadImage();
+        return md5($this->processed);
+    }
+
+    /**
      * Get image blob
      *
      * @return string
@@ -221,6 +246,19 @@ class Proxy
     {
         $this->loadImage();
         return $this->processed;
+    }
+
+    /**
+     * Clean Image Cache
+     */
+    public function cleanImageCache()
+    {
+        foreach ($this->filesystem->listContents() as $item)
+        {
+            if ($item['type'] === 'dir') {
+                $this->filesystem->deleteDir($item['path']);
+            }
+        }
     }
 
     /**
@@ -254,9 +292,9 @@ class Proxy
 
     /**
      * Load original image
-     *
      * @return bool
      * @throws NotFoundException
+     * @throws ProcessingException
      */
     protected function loadOriginal() : bool
     {
@@ -270,8 +308,8 @@ class Proxy
         }
 
         $headers =  [
-            'Accept' => 'image/jpeg;image/png',
-            'User-Agent' => "OWJA!bot (+{$this->botUrl})"
+            'Accept' => implode(', ', $this->allowedMimeTypes),
+            'User-Agent' => "OWJA!bot ImageProxy"
         ];
 
         if ($this->token) {
@@ -290,6 +328,11 @@ class Proxy
 
         } catch (\Exception $e) {
             throw new NotFoundException('Could not load image from URL.', 404, $e);
+        }
+
+        if (empty($response->getHeader('Content-Type'))
+            || !in_array($response->getHeader('Content-Type')[0], $this->allowedMimeTypes)) {
+            throw new ProcessingException('File ist not a Image of type png, jpeg or gif.', 500, $e);
         }
 
         $this->original = $content;

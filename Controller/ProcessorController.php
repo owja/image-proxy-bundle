@@ -2,9 +2,11 @@
 
 namespace Owja\ImageProxyBundle\Controller;
 
+use Owja\ImageProxyBundle\Service\Config;
 use Owja\ImageProxyBundle\Service\Proxy;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -26,6 +28,8 @@ class ProcessorController extends Controller
      *     }
      * )
      *
+     * @param Request $request
+     *
      * @param string $site
      * @param string $type
      * @param int $width
@@ -34,18 +38,21 @@ class ProcessorController extends Controller
      *
      * @return Response
      */
-    public function siteProcessAction(string $site, string $type, $width, $height, string $image)
+    public function siteProcessAction(Request $request, string $site, string $type, $width, $height, string $image)
     {
         /** @var Proxy $proxy */
         $proxy = $this->container->get('owja_image_proxy.proxy');
 
-        if ($this->container->getParameter('owja_image_proxy.enable_sites') !== true) {
+        /** @var Config $config */
+        $config = $this->container->get('owja_image_proxy.config');
+
+        if (false === $config->isSitesEnabled()) {
             throw new NotFoundHttpException("Site processing is disabled.");
         }
 
-        $url = "http://owja.de/";   // ToDo load Site Configuration
+        $url = $config->getSiteUrl($site);
 
-        $this->checkSize($width, $height);
+        $this->checkSize((int) $width, (int) $height);
 
         $proxy
             ->setHeight((int) $height)
@@ -54,9 +61,7 @@ class ProcessorController extends Controller
             ->setNamespace($site)
             ->setUrl($url . $image);
 
-        return new Response($proxy->getContent(), 200, [
-            'Content-Type' => $proxy->getMimeType()
-        ]);
+        return $this->createResponse($proxy, $request);
     }
 
     /**
@@ -73,6 +78,8 @@ class ProcessorController extends Controller
      *     }
      * )
      *
+     * @param Request $request
+     *
      * @param string $type
      * @param int $width
      * @param int $height
@@ -80,16 +87,16 @@ class ProcessorController extends Controller
      *
      * @return Response
      */
-    public function defaultProcessAction(string $type, $width, $height, string $image)
+    public function defaultProcessAction(Request $request, string $type, $width, $height, string $image)
     {
         /** @var Proxy $proxy */
         $proxy = $this->container->get('owja_image_proxy.proxy');
 
-        if (null === $url = $this->container->getParameter('owja_image_proxy.default_url')) {
-            throw new NotFoundHttpException("owja_image_proxy.default_url is not configured.");
-        }
+        /** @var Config $config */
+        $config = $this->container->get('owja_image_proxy.config');
 
-        $this->checkSize($width, $height);
+        $url = $config->getDefaultUrl();
+        $this->checkSize((int) $width, (int) $height);
 
         $proxy
             ->setHeight((int) $height)
@@ -98,9 +105,30 @@ class ProcessorController extends Controller
             ->setNamespace('default')
             ->setUrl($url . $image);
 
-        return new Response($proxy->getContent(), 200, [
+        return $this->createResponse($proxy, $request);
+    }
+
+    /**
+     * Create Response
+     *
+     * @param Proxy $proxy
+     * @param Request $request
+     * @return Response
+     */
+    protected function createResponse(Proxy $proxy, Request $request)
+    {
+        $response = new Response($proxy->getContent(), 200, [
             'Content-Type' => $proxy->getMimeType()
         ]);
+
+        $response->setPublic();
+        // $response->setLastModified((new \DateTime())->setTimestamp($proxy->getTimestamp()));
+        $response->setExpires(new \DateTime('now +7 days'));
+        $response->setEtag($proxy->getCacheTag());
+
+        $response->isNotModified($request);
+
+        return $response;
     }
 
     /**
@@ -108,17 +136,17 @@ class ProcessorController extends Controller
      *
      * @param int $width
      * @param int $height
+     * @throws BadRequestHttpException
      */
     protected function checkSize(int $width, int $height)
     {
-        if ((
-                $this->container->getParameter('owja_image_proxy.limit_height')
-                && $height > $this->container->getParameter('owja_image_proxy.limit_height')
-            ) || (
-                $this->container->getParameter('owja_image_proxy.limit_width')
-                && $width > $this->container->getParameter('owja_image_proxy.limit_width')
-            )) {
-            throw new BadRequestHttpException('Imagesize not supported.');
+        /** @var Config $config */
+        $config = $this->container->get('owja_image_proxy.config');
+
+        if (($config->getHeightLimit() && $height > $config->getHeightLimit())
+            || ($config->getWidthLimit() && $width > $config->getWidthLimit()))
+        {
+            throw new BadRequestHttpException('Image size not supported.');
         }
 
     }

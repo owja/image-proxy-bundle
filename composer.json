@@ -13,14 +13,12 @@
   "require": {
     "php": ">=7.0.0",
     "oneup/flysystem-bundle": "^1.14",
-    "guzzlehttp/guzzle": "~6.0"
+    "guzzlehttp/guzzle": "~6.0",
+    "ps/image-optimizer": "^1.1"
   },
   "require-dev": {
   },
-  "autoload" : {
-    "psr-0" : {
-      "Owja\\ImageProxyBundle" : ""
-    }
-  },
-  "target-dir" : "Owja/ImageProxyBundle"
+  "autoload": {
+    "psr-4": { "Owja\\ImageProxyBundle\\": "" }
+  }
 }
