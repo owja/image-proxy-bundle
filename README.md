@@ -1,5 +1,7 @@
 # OWJA! Image Proxy Bundle
 
+[![Latest Stable Version](https://poser.pugx.org/owja/image-proxy-bundle/v/stable)](https://packagist.org/packages/owja/image-proxy-bundle?format=flat-square) [![Latest Unstable Version](https://poser.pugx.org/owja/image-proxy-bundle/v/unstable)](https://packagist.org/packages/owja/image-proxy-bundle?format=flat-square) [![License](https://poser.pugx.org/owja/image-proxy-bundle/license)](https://packagist.org/packages/owja/image-proxy-bundle?format=flat-square)
+
 This Bundle is Open Source and under MIT license.
 
 With this Bundle you can add some Image Resizing and
@@ -7,31 +9,6 @@ Optimization Functionality to your Symfony Project.
 After Setup and Configuration you can access the Images
 on the same, or one or more other Servers, trough
 this Installation.
-
-#### Accessing the images
-http://.../`type`/`height`x`width`/`imagepath`
-
-Var | Value | Required | Info
---- | --- | --- | ---
-type | **resize** or **crop** | yes | Resize will first resize the image to best fit and then crop to destination size.
-height | integer | no | Destination height of Image
-width | integer | no | Destination width of Image
-imagepath | string | yes | The public path to the Image
-
-Example to resize and crop the Image to fit into a 100x100 Pixel square:
-- `http://example.com/resize/100x100/img/someimage.jpg`
-
-Example cropping to fit into a 100x100 Pixel square:
-- `http://example.com/resize/100x100/img/someimage.jpg`
-
-Example to resize to 100 Pixel with and preserve original image Ratio:
-- `http://example.com/resize/x100/img/someimage.jpg`
-
-Example to resize to 100 Pixel height and preserve original image Ratio:
-- `http://example.com/resize/100x/img/someimage.jpg`
-
-Example to do ony the optimizations:
-- `http://example.com/resize/x/img/someimage.jpg`
 
 ## Installation
 
@@ -78,6 +55,38 @@ Create the Directory for temporary Files which gets created while processing the
 var/temp
 ```
 
+## Accessing the images
+http://.../`type`/`height`x`width`/`imagepath`
+
+Var | Value | Required | Info
+--- | --- | --- | ---
+type | **resize** or **crop** | yes | Resize will first resize the image to best fit and then crop to destination size.
+height | integer | no | Destination height of Image
+width | integer | no | Destination width of Image
+imagepath | string | yes | The public path to the Image
+
+#### Examples
+
+Resize and crop the Image to fit into a 100x100 Pixel square
+
+``` http://example.com/resize/100x100/img/someimage.jpg ```
+
+Cropping to fit into a 100x100 Pixel square
+
+``` http://example.com/resize/100x100/img/someimage.jpg ```
+
+Resize to 100 Pixel with and preserve original image Ratio
+
+``` http://example.com/resize/x100/img/someimage.jpg ```
+
+Resize to 100 Pixel height and preserve original image Ratio
+
+``` http://example.com/resize/100x/img/someimage.jpg ```
+
+Optimizations only:
+
+``` http://example.com/resize/x/img/someimage.jpg ```
+
 ## Configuration Details
 
 ```
@@ -123,13 +132,17 @@ owja_image_proxy:
             url: "http://wherever.com/"
 ```
 
-##### Accessing the sites
-http://.../`site`/`type`/`height`x`width`/`imagepath`
+##### Accessing by sites
 
-- `http://example.com/default/resize/100x100/images/someimage.jpg`
-- `http://example.com/othersite/resize/100x100/images/someimage.jpg`
-- `http://example.com/wherever/resize/100x100/images/someimage.jpg`
+Same as explained above ("Accessing the images"), but with site parameter
 
+``` http://.../`site`/`type`/`height`x`width`/`imagepath` ```
+
+```
+http://example.com/default/resize/100x100/images/someimage.jpg
+http://example.com/othersite/resize/100x100/images/someimage.jpg
+http://example.com/wherever/resize/100x100/images/someimage.jpg
+```
 
 ## Image Optimization
 
