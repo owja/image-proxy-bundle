@@ -1,5 +1,7 @@
 # OWJA! Image Proxy Bundle
 
+[![Latest Stable Version](https://poser.pugx.org/owja/image-proxy-bundle/v/stable)](https://packagist.org/packages/owja/image-proxy-bundle?format=flat-square) [![Latest Unstable Version](https://poser.pugx.org/owja/image-proxy-bundle/v/unstable)](https://packagist.org/packages/owja/image-proxy-bundle?format=flat-square) [![License](https://poser.pugx.org/owja/image-proxy-bundle/license)](https://packagist.org/packages/owja/image-proxy-bundle?format=flat-square)
+
 This Bundle is Open Source and under MIT license.
 
 With this Bundle you can add some Image Resizing and
@@ -23,11 +25,13 @@ imagepath | string | yes | The public path to the Image
 
 
 Example to get image "img/someimage.jpg" processed by preset "fullhd":
-- `http://example.com/:fullhd/img/someimage.jpg`
+``` http://example.com/:fullhd/img/someimage.jpg ```
 
 #### Dynamic Mode
 
 `enable_dynamic` must be set to `true` to use this. Default is `false`.
+
+**IMPORTANT! Dynamic mode should not used in production environment!** 
 
 http://.../`type`/`height`x`width`/`imagepath`
 
@@ -38,22 +42,28 @@ height | integer | no | Destination height of Image
 width | integer | no | Destination width of Image
 imagepath | string | yes | The public path to the Image
 
-Example to resize and crop the Image to fit into a 100x100 Pixel square:
-- `http://example.com/resize/100x100/img/someimage.jpg`
+#### Examples
 
-Example cropping to fit into a 100x100 Pixel square:
-- `http://example.com/resize/100x100/img/someimage.jpg`
+Resize and crop the Image to fit into a 100x100 Pixel square
 
-Example to resize to 100 Pixel with and preserve original image Ratio:
-- `http://example.com/resize/x100/img/someimage.jpg`
+``` http://example.com/resize/100x100/img/someimage.jpg ```
 
-Example to resize to 100 Pixel height and preserve original image Ratio:
-- `http://example.com/resize/100x/img/someimage.jpg`
+Cropping to fit into a 100x100 Pixel square
 
-Example to do only the optimizations:
-- `http://example.com/resize/x/img/someimage.jpg`
+``` http://example.com/resize/100x100/img/someimage.jpg ```
 
-**IMPORTANT: Dynamic mode should not used in production environment.** 
+Resize to 100 Pixel with and preserve original image Ratio
+
+``` http://example.com/resize/x100/img/someimage.jpg ```
+
+Resize to 100 Pixel height and preserve original image Ratio
+
+``` http://example.com/resize/100x/img/someimage.jpg ```
+
+Optimizations only:
+
+``` http://example.com/resize/x/img/someimage.jpg ```
+
 
 
 ## Installation
@@ -63,13 +73,15 @@ $ composer require owja/image-proxy-bundle
 ```
 
 Load Bundles in **app/AppKernel.php**
-```
+
+```PHP
 new Oneup\FlysystemBundle\OneupFlysystemBundle(),
 new Owja\ImageProxyBundle\OwjaImageProxyBundle(),
 ```
 
 Setup your **app/config/config.yml**
-```
+
+```YML
 oneup_flysystem:
     adapters:
         image_cache_adapter:
@@ -86,10 +98,12 @@ owja_image_proxy:
         default:
             url: "http://example.com/"
 ```
+
 Set "http://example.com/" to the URL representing the source of your images.
 
 Setup your **app/config/routing.yml**
-```
+
+```YML
 owja_image_proxy:
     resource: "@OwjaImageProxyBundle/Controller/"
     type:     annotation
@@ -103,7 +117,7 @@ var/temp
 
 ## Configuration Details
 
-```
+```YML
 owja_image_proxy:
     remote:
         token: null
@@ -139,7 +153,7 @@ enable_presets | *true* | Set to *true* to enable processing predefined presets
 
 Simply add some sites and set enable_sites to true
 
-```
+```YML
 owja_image_proxy:
     enable_sites: true
     sites:
@@ -151,28 +165,35 @@ owja_image_proxy:
             url: "http://wherever.com/"
 ```
 
-### Accessing the sites
+### Accessing the images by sites
+
+Same as explained above ("Accessing the images"), but with site parameter
+
 #### Dynamic Mode
 
-http://.../`site`/`type`/`height`x`width`/`imagepath`
+http://.../`site`/`type`/`width`x`height`/`imagepath`
 
-- `http://example.com/default/resize/100x100/images/someimage.jpg`
-- `http://example.com/othersite/resize/100x100/images/someimage.jpg`
-- `http://example.com/wherever/resize/100x100/images/someimage.jpg`
+```
+http://example.com/default/resize/100x100/images/someimage.jpg
+http://example.com/othersite/resize/100x100/images/someimage.jpg
+http://example.com/wherever/resize/100x100/images/someimage.jpg
+```
 
 #### Preset Mode
 
 http://.../`site`:`preset`/`imagepath`
 
-- `http://example.com/default:fullhd/images/someimage.jpg`
-- `http://example.com/othersite:fullhd/images/someimage.jpg`
-- `http://example.com/wherever:fullhd/images/someimage.jpg`
+```
+http://example.com/default:fullhd/images/someimage.jpg
+http://example.com/othersite:fullhd/images/someimage.jpg
+http://example.com/wherever:fullhd/images/someimage.jpg
+```
 
 ## Presets Configuration
 
 Global Presets:
 
-```
+```YML
 owja_image_proxy:
     enable_presets: true
     presets:
@@ -191,7 +212,8 @@ owja_image_proxy:
 ```
 
 Per Site Presets:
-```
+
+```YML
 owja_image_proxy:
     enable_presets: true
     sites:
@@ -221,10 +243,12 @@ apt install gifsicle jpegoptim pngquant optipng
 
 If you have installed some optimizers but want to disable
 optimization you can do this at **app/config/config.yml**
-```
+
+```YML
 owja_image_proxy:
     optimization: false
 ```
+
 ## Reporting & Collaboration
 
 Issues and feature requests are tracked in this Github Issue Tracker.
