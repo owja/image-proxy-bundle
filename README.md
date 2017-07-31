@@ -1,6 +1,9 @@
 # OWJA! Image Proxy Bundle
 
-[![Latest Stable Version](https://poser.pugx.org/owja/image-proxy-bundle/v/stable)](https://packagist.org/packages/owja/image-proxy-bundle?format=flat-square) [![Latest Unstable Version](https://poser.pugx.org/owja/image-proxy-bundle/v/unstable)](https://packagist.org/packages/owja/image-proxy-bundle?format=flat-square) [![License](https://poser.pugx.org/owja/image-proxy-bundle/license)](https://packagist.org/packages/owja/image-proxy-bundle?format=flat-square)
+[![Latest Stable Version](https://poser.pugx.org/owja/image-proxy-bundle/v/stable)](https://packagist.org/packages/owja/image-proxy-bundle?format=flat-square)
+[![Latest Unstable Version](https://poser.pugx.org/owja/image-proxy-bundle/v/unstable)](https://packagist.org/packages/owja/image-proxy-bundle?format=flat-square)
+[![License](https://poser.pugx.org/owja/image-proxy-bundle/license)](https://packagist.org/packages/owja/image-proxy-bundle?format=flat-square)
+[![Build Status](https://travis-ci.org/owja/image-proxy-bundle.svg?branch=master)](https://travis-ci.org/owja/image-proxy-bundle)
 
 This Bundle is Open Source and under MIT license.
 
