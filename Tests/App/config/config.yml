@@ -1,0 +1,35 @@
+framework:
+    translator: { fallback: en }
+    secret: secret
+    router:
+        resource: "%kernel.root_dir%/config/routing.yml"
+        strict_requirements: %kernel.debug%
+    templating:
+        engines: ['php']
+    default_locale: en
+    session: ~
+    test: ~
+    trusted_hosts: ~`
+
+oneup_flysystem:
+    adapters:
+        image_cache_adapter:
+            local:
+                directory: "%kernel.root_dir%/../var/images"
+
+    filesystems:
+        image_cache_filesystem:
+            adapter: image_cache_adapter
+            alias: owja_image_proxy.cache
+
+owja_image_proxy:
+    sites:
+        default:
+            url: "http://owja.de/"
+    presets:
+        hd:
+            width: 1280
+            height: 720
+        fullhd:
+            width: 1920
+            height: 1080

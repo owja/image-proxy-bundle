@@ -1,0 +1,13 @@
+<?php
+
+namespace Owja\ImageProxyBundle\Tests\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+class ProcessorControllerTest extends WebTestCase
+{
+    public function testIndex()
+    {
+
+    }
+}

@@ -1,0 +1,4 @@
+owja_image_proxy:
+    resource: "Owja\\ImageProxyBundle\\Controller"
+    type:     annotation
+    prefix:   /
