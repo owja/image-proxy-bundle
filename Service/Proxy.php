@@ -3,11 +3,16 @@ namespace Owja\ImageProxyBundle\Service;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
+
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\FilesystemInterface;
+
 use Owja\ImageProxyBundle\Exception\ConfigurationException;
 use Owja\ImageProxyBundle\Exception\NotFoundException;
 use Owja\ImageProxyBundle\Exception\ProcessingException;
+
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 class Proxy
 {
@@ -246,6 +251,29 @@ class Proxy
     {
         $this->loadImage();
         return $this->processed;
+    }
+
+    /**
+     * Create Response
+     *
+     * @param SymfonyRequest $request
+     * @return SymfonyResponse
+     */
+    public function createResponse(SymfonyRequest $request = null)
+    {
+        $response = new SymfonyResponse($this->getContent(), 200, [
+            'Content-Type' => $this->getMimeType()
+        ]);
+
+        $response->setPublic();
+        $response->setExpires(new \DateTime('now +7 days'));
+        $response->setEtag($this->getCacheTag());
+
+        if ($request !== null) {
+            $response->isNotModified($request);
+        }
+
+        return $response;
     }
 
     /**

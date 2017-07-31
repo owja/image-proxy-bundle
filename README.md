@@ -8,7 +8,27 @@ After Setup and Configuration you can access the Images
 on the same, or one or more other Servers, trough
 this Installation.
 
-#### Accessing the images
+### Accessing the images
+
+#### Preset Mode
+
+`enable_presets` must be set to `true` to use this. Default is `true`.
+
+http://.../:`preset`/`imagepath`
+
+Var | Value | Required | Info
+--- | --- | --- | ---
+preset | string | yes | The preset code 
+imagepath | string | yes | The public path to the Image
+
+
+Example to get image "img/someimage.jpg" processed by preset "fullhd":
+- `http://example.com/:fullhd/img/someimage.jpg`
+
+#### Dynamic Mode
+
+`enable_dynamic` must be set to `true` to use this. Default is `false`.
+
 http://.../`type`/`height`x`width`/`imagepath`
 
 Var | Value | Required | Info
@@ -30,8 +50,11 @@ Example to resize to 100 Pixel with and preserve original image Ratio:
 Example to resize to 100 Pixel height and preserve original image Ratio:
 - `http://example.com/resize/100x/img/someimage.jpg`
 
-Example to do ony the optimizations:
+Example to do only the optimizations:
 - `http://example.com/resize/x/img/someimage.jpg`
+
+**IMPORTANT: Dynamic mode should not used in production environment.** 
+
 
 ## Installation
 
@@ -89,10 +112,12 @@ owja_image_proxy:
         height: 1080
         width: 1920
     temp_dir: "%kernel.root_dir%/../var/temp/"
-    cache_service: owja_image_proxy.cache
+    cache_service: "owja_image_proxy.cache"
     optimization: true
     default_site: default
     enable_sites: false
+    enable_dynamic: false
+    enable_presets: true
 ```
 
 CVar | Default | Info
@@ -102,10 +127,13 @@ remote : timeout | 10 | Request timeout to get the source image
 limits : height | 1080 | Maximum allowed height of requested Image
 limits : width | 1920 | Maximum allowed width of requested Image
 temp_dir | "%kernel.root_dir%/../var/temp/" | Temporary directory for image processing
-cache_service | owja_image_proxy.cache | The name of the cache filesystem (oneup_flysystem)
+cache_service | "owja_image_proxy.cache" | The name of the cache filesystem (oneup_flysystem)
 optimization | *true* | Enable/disable image optimization
-default_site | default | Code of the default site. Has to be configured under *sites*
+default_site | "default" | Code of the default site. Has to be configured under *sites*
 enable_sites | *false* | Set to *true* to enable more than the default site
+enable_dynamic | *false* | Set to *true* to enable dynamic mode
+enable_presets | *true* | Set to *true* to enable processing predefined presets
+
 
 ## Multiple Sites
 
@@ -123,13 +151,64 @@ owja_image_proxy:
             url: "http://wherever.com/"
 ```
 
-##### Accessing the sites
+### Accessing the sites
+#### Dynamic Mode
+
 http://.../`site`/`type`/`height`x`width`/`imagepath`
 
 - `http://example.com/default/resize/100x100/images/someimage.jpg`
 - `http://example.com/othersite/resize/100x100/images/someimage.jpg`
 - `http://example.com/wherever/resize/100x100/images/someimage.jpg`
 
+#### Preset Mode
+
+http://.../`site`:`preset`/`imagepath`
+
+- `http://example.com/default:fullhd/images/someimage.jpg`
+- `http://example.com/othersite:fullhd/images/someimage.jpg`
+- `http://example.com/wherever:fullhd/images/someimage.jpg`
+
+## Presets Configuration
+
+Global Presets:
+
+```
+owja_image_proxy:
+    enable_presets: true
+    presets:
+        fullhd:
+            width: 1920
+            height: 1080
+        banner:
+            width: 1600
+        profile:
+            height: 50
+            width: 50
+        cuthd:
+            width: 1280
+            height: 720
+            type: crop            
+```
+
+Per Site Presets:
+```
+owja_image_proxy:
+    enable_presets: true
+    sites:
+        default:
+            url: "http://example.com/"
+            presets:
+                fullhd:
+                    width: 1920
+                    height: 1080
+        whereever:
+            url: "http://whereever.com/"
+            presets:
+                banner:
+                    width: 1600
+                    height: 200
+        
+```
 
 ## Image Optimization
 

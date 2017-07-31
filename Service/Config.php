@@ -1,6 +1,7 @@
 <?php
 namespace Owja\ImageProxyBundle\Service;
 
+use Owja\Helper\Data;
 use Owja\ImageProxyBundle\Exception\ConfigurationException;
 use Owja\ImageProxyBundle\Exception\NotFoundException;
 
@@ -18,7 +19,7 @@ class Config
      */
     public function __construct(array $config)
     {
-        $this->config = $config;
+        $this->config = new Data($config);
     }
 
     /**
@@ -28,7 +29,7 @@ class Config
      */
     public function isSitesEnabled() : bool
     {
-        return (bool) $this->config['enable_sites'];
+        return (bool) $this->get('enable_sites');
     }
 
     /**
@@ -38,7 +39,38 @@ class Config
      */
     public function isDefaultEnabled() : bool
     {
-        return is_string($this->config['default_site']) && !empty($this->config['default_site']);
+        $site = $this->get('default_site');
+        return is_string($site) && !empty($site);
+    }
+
+    /**
+     * Get Default Site
+     *
+     * @return string
+     */
+    public function getDefaultSiteCode() : string
+    {
+        return $this->get('default_site');
+    }
+
+    /**
+     * Is dynamic processing enabled?
+     *
+     * @return bool
+     */
+    public function isDynamicEnabled() : bool
+    {
+        return (bool) $this->get('enable_dynamic');
+    }
+
+    /**
+     * Is processing by presets enabled?
+     *
+     * @return bool
+     */
+    public function isPresetsEnabled() : bool
+    {
+        return (bool) $this->get('enable_presets');
     }
 
     /**
@@ -53,7 +85,7 @@ class Config
             throw new ConfigurationException('Default Site is not enabled');
         }
 
-        return $this->getSiteUrl($this->config['default_site']);
+        return $this->getSiteUrl($this->get('default_site'));
     }
 
     /**
@@ -65,13 +97,38 @@ class Config
      */
     public function getSiteUrl(string $code) : string
     {
-        if (isset($this->config['sites'][$code])) {
-            return $this->config['sites'][$code]['url'];
+        if (null !== $url = $this->get("sites.{$code}.url")) {
+            return $url;
         }
 
-        // ToDo trigger event and try to resolve the listener
+        // ToDo trigger event and try to resolve by the listeners
 
-        throw new NotFoundException("Site {$code} not found.");
+        throw new NotFoundException("Site \"{$code}\" not found.");
+    }
+
+    /**
+     * Get processing configuration for site by code
+     *
+     * @param string $code
+     * @param string $site
+     * @return array
+     * @throws NotFoundException
+     */
+    public function getProcessingConfig(string $code, string $site = null) : array
+    {
+        // Search for preset by site
+        if ($site && null !== $config = $this->get("sites.{$site}.presets.{$code}")) {
+            return $config;
+        }
+
+        // Search for global defined preset
+        if (null !== $config = $this->get("presets.{$code}")) {
+            return $config;
+        }
+
+        // ToDo trigger event and try to resolve by the listeners
+
+        throw new NotFoundException("Preset \"{$code}\" not found.");
     }
 
     /**
@@ -81,7 +138,7 @@ class Config
      */
     public function getHeightLimit() : int
     {
-        return (int) $this->config['limits']['height'];
+        return (int) $this->get('limits.height');
     }
 
     /**
@@ -91,6 +148,17 @@ class Config
      */
     public function getWidthLimit() : int
     {
-        return (int) $this->config['limits']['width'];
+        return (int) $this->get('limits.width');
+    }
+
+    /**
+     * Get config var
+     *
+     * @param string $var
+     * @return mixed
+     */
+    protected function get(string $var)
+    {
+        return $this->config->get($var);
     }
 }
