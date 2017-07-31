@@ -195,7 +195,7 @@ class Process
         {
             if ($originalWidth / $originalHeight < $this->width / $this->height) {
                 $resizeWidth = $this->width;
-                $resizeHeight = $this->height;
+                $resizeHeight = 0;
             } else {
                 $resizeWidth = 0;
                 $resizeHeight = $this->height;
